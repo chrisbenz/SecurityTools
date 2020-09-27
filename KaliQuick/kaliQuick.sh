@@ -27,3 +27,7 @@ cd Sublist3r
 sudo pip install -r requirements.txt
 cd ~/DownloadedTools
 echo "Complete"
+
+echo "Installing Github Search"
+git clone https://github.com/gwen001/github-search.git
+echo "Complete"
