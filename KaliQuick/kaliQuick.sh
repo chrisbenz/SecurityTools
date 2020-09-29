@@ -6,6 +6,8 @@ echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sou
 sudo apt-get -y update
 sudo apt-get install -y sublime-text
 
+sudo apt-get install -y snapd
+
 # Pip, Pip3
 sudo apt-get -y install python3-pip
 sudo apt-get -y install python-pip
@@ -30,4 +32,8 @@ echo "Complete"
 
 echo "Installing Github Search"
 git clone https://github.com/gwen001/github-search.git
+echo "Complete"
+
+echo "Installing Amass"
+sudo apt-get install -y amass
 echo "Complete"
