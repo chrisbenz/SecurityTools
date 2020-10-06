@@ -30,6 +30,14 @@ sudo pip install -r requirements.txt
 cd ~/DownloadedTools
 echo "Complete"
 
+echo "Installing subfinder"
+git clone https://github.com/projectdiscovery/subfinder.git
+cd subfinder/v2/cmd/subfinder
+go build .
+sudo mv subfinder /usr/local/bin/
+cd ~/DownloadedTools
+echo "Complete"
+
 echo "Installing Github Search"
 git clone https://github.com/gwen001/github-search.git
 echo "Complete"
