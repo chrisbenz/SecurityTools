@@ -45,3 +45,7 @@ echo "Complete"
 echo "Installing Amass"
 sudo apt-get install -y amass
 echo "Complete"
+
+echo "Installing DirSearch"
+git clone https://github.com/maurosoria/dirsearch.git
+echo "Complete"
