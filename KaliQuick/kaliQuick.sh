@@ -48,4 +48,6 @@ echo "Complete"
 
 echo "Installing DirSearch"
 git clone https://github.com/maurosoria/dirsearch.git
+cd dirsearch
+sudo pip3 install -r requirements.txt
 echo "Complete"
