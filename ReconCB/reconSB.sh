@@ -2,6 +2,7 @@
 
 option="$1"
 domain=$2
+timeStamp=`date +"%Y-%m-%d-%T"`
 
 header() {
 	echo '_____________________________________   _________________ 
@@ -22,12 +23,13 @@ validate() {
 
 subdomains() {
 	echo "Grabbing subdomains from Amass..."
-	cd ${STORAGE}
-	amass enum -o amass-enum.txt -d ${domain}
+	cd ${storage}
+
 	echo "Grabbing subdomains from subfinder..."
-	subfinder -o subfinder-enum.txt -d ${domain}
+	amass enum -o amass-enum.txt -d ${domain}
 
 	echo "Merging subdomain lists and removing duplicates..."
+	subfinder -o subfinder-enum.txt -d ${domain}
 	sort -u amass-enum.txt subfinder-enum.txt > domains.txt
 
 	echo "Checking for live hosts from domains..."
@@ -35,11 +37,12 @@ subdomains() {
 }
 
 
-STORAGE="${domain}-recon"
-mkdir ${STORAGE}
-
 validate
 header
+
+storage="${domain}-recon-${timeStamp}"
+mkdir ${storage}
+
 subdomains
 
 exit 0
