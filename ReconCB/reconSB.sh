@@ -1,16 +1,15 @@
 #!/bin/bash
 
-option="$1"
+option=$1
 domain=$2
-timeStamp=`date +"%Y-%m-%d-%T"`
+argCount=$#
+timeStamp=`date +"%Y-%m-%d_%H-%M-%s"`
 
 header() {
-	echo '_____________________________________   _________________ 
-	___  __ \__  ____/_  ____/_  __ \__  | / /_  ____/__  __ )
-	__  /_/ /_  __/  _  /    _  / / /_   |/ /_  /    __  __  |
-	_  _, _/_  /___  / /___  / /_/ /_  /|  / / /___  _  /_/ / 
-	/_/ |_| /_____/  \____/  \____/ /_/ |_/  \____/  /_____/  
-	'
+	echo '--------------------------------------------------------------------'
+	echo 'Starting Recon...'
+	echo '--------------------------------------------------------------------'
+
 }
 
 validate() {
@@ -19,23 +18,37 @@ validate() {
 		echo "Usage: ./reconSB.sh -d domain"
 		exit 1
 	fi
+
+	if [ $argCount -ne 2 ]
+	then
+		echo "Usage: ./reconSB.sh -d domain"
+		exit 1
+	fi
 }
 
 subdomains() {
-	echo "Grabbing subdomains from Amass..."
 	cd ${storage}
 
-	echo "Grabbing subdomains from subfinder..."
-	amass enum -o amass-enum.txt -d ${domain}
+	echo "Grabbing subdomains from (Amass), this may take some time..."
+	amass enum -o amass-enum.txt -r 8.8.8.8 -d ${domain}
 
-	echo "Merging subdomain lists and removing duplicates..."
+	echo '--------------------------------------------------------------------'
+	echo "Grabbing subdomains from (subfinder)..."
 	subfinder -o subfinder-enum.txt -d ${domain}
+
+	echo '--------------------------------------------------------------------'
+	echo "Merging subdomain lists and removing duplicates..."
 	sort -u amass-enum.txt subfinder-enum.txt > domains.txt
 
+	echo '--------------------------------------------------------------------'
 	echo "Checking for live hosts from domains..."
 	cat domains.txt | httprobe > livehosts.txt
-}
 
+	echo "Finished gathering domains, sorting livehosts..."
+	sort livehosts.txt > hostList.txt
+
+	echo "Done!"
+}
 
 validate
 header
@@ -46,4 +59,3 @@ mkdir ${storage}
 subdomains
 
 exit 0
-
