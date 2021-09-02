@@ -55,3 +55,10 @@ echo "Complete"
 echo "Installing getallurls (gau)"
 GO111MODULE=on go get -u -v github.com/lc/gau
 echo "Complete"
+
+echo "Installing Eyewitness"
+cd ~/DownloadedTools
+git clone https://github.com/FortyNorthSecurity/EyeWitness.git
+cd EyeWitness/Python/setup
+sudo ./setup.sh
+echo "Complete"

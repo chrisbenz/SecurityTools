@@ -44,6 +44,12 @@ subdomains() {
 	echo "Checking for live hosts from domains..."
 	cat domains.txt | httprobe > livehosts.txt
 
+	echo "Gather domains from gau..."
+	gau -subs ${domain} | cut -d / -f 3 | sort -u >> livehosts.txt
+
+	echo "Gathering some screenshots of live hosts..."
+	~/DownloadedTools/EyeWitness/Python/EyeWitness.py -f ~/Desktop/${storage}/livehosts.txt --web -d "${storage}-screenshots"
+
 	echo "Finished gathering domains, sorting livehosts..."
 	sort livehosts.txt > hostList.txt
 
