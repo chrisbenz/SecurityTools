@@ -11,3 +11,4 @@ Bash script for downloading some tools I like to have upon loading a new Kali in
 - gau (get all urls)
 - Sublist3r
 - Subfinder
+- EyeWitness
