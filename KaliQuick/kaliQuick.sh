@@ -51,3 +51,7 @@ git clone https://github.com/maurosoria/dirsearch.git
 cd dirsearch
 sudo pip3 install -r requirements.txt
 echo "Complete"
+
+echo "Installing getallurls (gau)"
+GO111MODULE=on go get -u -v github.com/lc/gau
+echo "Complete"
