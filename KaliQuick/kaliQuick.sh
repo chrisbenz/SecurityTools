@@ -56,6 +56,10 @@ echo "Installing getallurls (gau)"
 GO111MODULE=on go get -u -v github.com/lc/gau
 echo "Complete"
 
+echo "Installing GoSpider"
+GO111MODULE=on go get -u github.com/jaeles-project/gospider
+echo "Complete"
+
 echo "Installing Eyewitness"
 cd ~/DownloadedTools
 git clone https://github.com/FortyNorthSecurity/EyeWitness.git

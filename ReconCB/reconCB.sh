@@ -30,7 +30,7 @@ subdomains() {
 	cd ${storage}
 
 	echo "Grabbing subdomains from (Amass), this may take some time..."
-	amass enum -o amass-enum.txt -r 8.8.8.8 -d ${domain}
+	amass enum -passive -o amass-enum.txt -r 8.8.8.8 -d ${domain}
 
 	echo '--------------------------------------------------------------------'
 	echo "Grabbing subdomains from (subfinder)..."
@@ -49,6 +49,9 @@ subdomains() {
 
 	echo "Gathering some screenshots of live hosts..."
 	~/DownloadedTools/EyeWitness/Python/EyeWitness.py -f ~/Desktop/${storage}/livehosts.txt --web -d "${storage}-screenshots"
+
+	echo "Crawling through sites with GoSpider..."
+	gospider -S livehosts.txt -o spiderResults -c 10 -d 1 
 
 	echo "Finished gathering domains, sorting livehosts..."
 	sort livehosts.txt > hostList.txt
