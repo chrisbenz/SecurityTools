@@ -73,3 +73,11 @@ git clone https://github.com/FortyNorthSecurity/EyeWitness.git
 cd EyeWitness/Python/setup
 sudo ./setup.sh
 echo "Complete"
+
+echo "Installing Masscan"
+cd ~/DownloadedTools
+git clone https://github.com/robertdavidgraham/masscan.git
+cd masscan
+make
+sudo make install
+echo "Complete"
