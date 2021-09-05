@@ -19,10 +19,6 @@ sudo apt-get install -y python-setuptools
 mkdir ~/DownloadedTools
 cd ~/DownloadedTools
 
-echo "Installing gau"
-git clone https://github.com/lc/gau.git
-echo "Complete"
-
 echo "Installing Sublist3r"
 git clone https://github.com/aboul3la/Sublist3r.git
 cd Sublist3r
@@ -78,6 +74,14 @@ echo "Installing Masscan"
 cd ~/DownloadedTools
 git clone https://github.com/robertdavidgraham/masscan.git
 cd masscan
+make
+sudo make install
+echo "Complete"
+
+echo "Installing MassDNS"
+cd ~/DownloadedTools
+git clone https://github.com/blechschmidt/massdns.git
+cd massdns
 make
 sudo make install
 echo "Complete"
