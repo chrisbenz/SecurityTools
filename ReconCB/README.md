@@ -11,6 +11,8 @@ up to date in conjunction with `kaliQuick.sh` so that all prerequisite dependenc
 ## Prerequisites
 * Amass
 * Subfinder
-* Httprobe
+* SubDomainizer
 * getallurls (gau) 
+* Httprobe
+* GoSpider
 * Eyewitness
