@@ -37,48 +37,56 @@ setup() {
 }
 
 subdomains() {
-	echo "${green}Grabbing subdomains from (Amass), this may take some time..."
+	echo "${green}Grabbing subdomains from (Amass), this may take some time...${reset}"
 	amass enum -o amass.txt -r 8.8.8.8 -d $domain
 
 	echo '--------------------------------------------------------------------'
-	echo "Grabbing subdomains from (subfinder)..."
+	echo "${green}Grabbing subdomains from (subfinder)...${reset}"
 	subfinder -o subfinder.txt -d $domain
 
 	echo '--------------------------------------------------------------------'
-	echo "Gather domains from gau..."
+	echo "${green}Gather domains from gau...${reset}"
 	gau -subs $domain | cut -d / -f 3 > gau.txt
 
 	echo '--------------------------------------------------------------------'
-	echo "Gathering domains from SubDomainizer..."
+	echo "${green}Gathering domains from SubDomainizer...${reset}"
 	python3 $toolPath/SubDomainizer/SubDomainizer.py -u $domain -o subdomainizer.txt
 
 	echo '--------------------------------------------------------------------'
-	echo "Merging subdomain lists and removing duplicates..."
+	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
 	sort -u amass.txt subfinder.txt gau.txt subdomainizer.txt > domains.txt
 
 }
 
 hostStatus() {
 	echo '--------------------------------------------------------------------'
-	echo "Checking for live hosts from domains..."
+	echo "${green}Checking for live hosts from domains...${reset}"
 	cat domains.txt | httprobe > livehosts.txt
+
+	echo '--------------------------------------------------------------------'
+	echo "${green}Using MassDNS for DNS bruteforcing...${reset}"
+	massdns -r $toolPath/massdns/lists/resolvers.txt -t AAAA livehosts.txt > massdns.txt
+	echo "${green}Performing additional recon through subbrute and ct.py...${reset}"
+	$toolPath/massdns/scripts/subbrute.py $toolPath/massdns/lists/names.txt $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w results.txt
+	$toolPath/massdns/scripts/ct.py $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w ct.txt
+
 }
 
 crawl() {
 	echo '--------------------------------------------------------------------'
-	echo "Crawling through sites with GoSpider..."
+	echo "${green}Crawling through sites with GoSpider...${reset}"
 	gospider -S livehosts.txt -o spiderResults -c 10 -d 1 
 }
 
 screenshots() {
 	echo '--------------------------------------------------------------------'
-	echo "Gathering some screenshots of live hosts..."
+	echo "${green}Gathering some screenshots of live hosts...${reset}"
 	yes n | $toolPath/EyeWitness/Python/EyeWitness.py -f livehosts.txt --web -d screenshots
 }
 
 cleanup() {
 	echo '--------------------------------------------------------------------'
-	echo "Gathering generated files together..."
+	echo "${green}Gathering generated files together...${reset}"
 	mkdir utilityFiles
 	mv amass.txt subfinder.txt gau.txt subdomainizer.txt domains.txt utilityFiles
 
@@ -87,9 +95,9 @@ cleanup() {
 		mv geckodriver.log utilityFiles
 	fi
 
-	echo "Finished gathering domains, sorting livehosts..."
+	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
 	sort -u livehosts.txt > hostList.txt	
-	echo "Done!${reset}"
+	echo "${green}Done!${reset}"
 }
 
 #############
