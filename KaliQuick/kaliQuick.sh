@@ -85,3 +85,7 @@ cd massdns
 make
 sudo make install
 echo "Complete"
+
+echo "Installing Brutespray"
+sudo apt-get install brutespray
+echo "Complete"

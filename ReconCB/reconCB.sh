@@ -55,14 +55,15 @@ subdomains() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
 	sort -u amass.txt subfinder.txt gau.txt subdomainizer.txt > domains.txt
-
 }
 
 hostStatus() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Checking for live hosts from domains...${reset}"
 	cat domains.txt | httprobe > livehosts.txt
+}
 
+massTools() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Using MassDNS for DNS bruteforcing...${reset}"
 	massdns -r $toolPath/massdns/lists/resolvers.txt -t AAAA livehosts.txt > massdns.txt
@@ -70,6 +71,13 @@ hostStatus() {
 	$toolPath/massdns/scripts/subbrute.py $toolPath/massdns/lists/names.txt $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w results.txt
 	$toolPath/massdns/scripts/ct.py $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w ct.txt
 
+	touch ips.txt
+	while read p; do
+		dig +short $p >> ips.txt 
+	done < livehosts.txt
+	sort -u ips.txt > sortedIPs.txt
+	echo "${green}Checking Masscan for IP ranges...${reset}" 
+	sudo masscan -p1-65535 -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
 }
 
 crawl() {
@@ -107,7 +115,8 @@ setup
 #############
 subdomains
 hostStatus
-crawl
+massTools
+#crawl
 screenshots
 #############
 cleanup
