@@ -77,7 +77,7 @@ massTools() {
 	done < livehosts.txt
 	sort -u ips.txt > sortedIPs.txt
 	echo "${green}Checking Masscan for IP ranges...${reset}" 
-	sudo masscan -p1-65535 -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
+	sudo masscan --top-ports 100 -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
 }
 
 crawl() {
