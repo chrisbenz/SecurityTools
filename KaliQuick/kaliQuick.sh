@@ -86,6 +86,17 @@ make
 sudo make install
 echo "Complete"
 
+echo "Installing ShuffleDNS"
+GO111MODULE=on go get -v github.com/projectdiscovery/shuffledns/cmd/shuffledns
+echo "Complete"
+
 echo "Installing Brutespray"
 sudo apt-get install brutespray
+echo "Complete"
+
+echo "Clone all.txt gist entry from Jason Haddix"
+cd ~/DownloadedTools
+git clone https://gist.github.com/86a06c5dc309d08580a018c66354a056.git
+mv 86a06c5dc309d08580a018c66354a056/all.txt .
+rm -rf 86a06c5dc309d08580a018c66354a056/
 echo "Complete"
