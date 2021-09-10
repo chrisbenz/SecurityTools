@@ -38,7 +38,7 @@ setup() {
 
 subdomains() {
 	echo "${green}Grabbing subdomains from (Amass), this may take some time...${reset}"
-	amass enum -o amass.txt -r 8.8.8.8 -d $domain
+	amass enum -passive -o amass.txt -r 8.8.8.8 -d $domain
 
 	echo '--------------------------------------------------------------------'
 	echo "${green}Grabbing subdomains from (subfinder)...${reset}"
@@ -53,8 +53,12 @@ subdomains() {
 	python3 $toolPath/SubDomainizer/SubDomainizer.py -u $domain -o subdomainizer.txt
 
 	echo '--------------------------------------------------------------------'
+	echo "${green}Gathering domains from ShuffleDNS through bruteforcing...${reset}"
+	shuffledns -d $domain -w $toolPath/all.txt -r $toolPath/massdns/lists/resolvers.txt -o shuffle.txt
+
+	echo '--------------------------------------------------------------------'
 	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
-	sort -u amass.txt subfinder.txt gau.txt subdomainizer.txt > domains.txt
+	sort -u amass.txt subfinder.txt gau.txt subdomainizer.txt shuffle.txt > domains.txt
 }
 
 hostStatus() {
@@ -77,7 +81,7 @@ massTools() {
 	done < livehosts.txt
 	sort -u ips.txt > sortedIPs.txt
 	echo "${green}Checking Masscan for IP ranges...${reset}" 
-	sudo masscan --top-ports 100 -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
+	sudo masscan --top-ports 100  -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
 }
 
 crawl() {
@@ -96,7 +100,7 @@ cleanup() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Gathering generated files together...${reset}"
 	mkdir utilityFiles
-	mv amass.txt subfinder.txt gau.txt subdomainizer.txt domains.txt utilityFiles
+	mv amass.txt subfinder.txt gau.txt subdomainizer.txt domains.txt shuffle.txt utilityFiles
 
 	if [ -e geckodriver.log ]
 	then
@@ -116,7 +120,7 @@ setup
 subdomains
 hostStatus
 massTools
-#crawl
+crawl
 screenshots
 #############
 cleanup
