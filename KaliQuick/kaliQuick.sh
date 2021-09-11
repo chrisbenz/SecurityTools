@@ -100,3 +100,7 @@ git clone https://gist.github.com/86a06c5dc309d08580a018c66354a056.git
 mv 86a06c5dc309d08580a018c66354a056/all.txt .
 rm -rf 86a06c5dc309d08580a018c66354a056/
 echo "Complete"
+
+echo "Installing FFUF"
+go get -u github.com/ffuf/ffuf
+echo "Complete"
