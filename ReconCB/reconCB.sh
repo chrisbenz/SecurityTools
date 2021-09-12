@@ -5,6 +5,7 @@ domain=$2
 argCount=$#
 timeStamp=`date +"%Y-%m-%d_%s"`
 toolPath=~/DownloadedTools
+wordList=/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
 
 red=`tput setaf 1`
 green=`tput setaf 2`
@@ -37,51 +38,51 @@ setup() {
 }
 
 subdomains() {
-	echo "${green}Grabbing subdomains from (Amass), this may take some time...${reset}"
+	echo "${green}Grabbing subdomains from Amass, this may take some time...${reset}"
 	amass enum -passive -o amass.txt -r 8.8.8.8 -d $domain
 
 	echo '--------------------------------------------------------------------'
-	echo "${green}Grabbing subdomains from (subfinder)...${reset}"
+	echo "${green}Grabbing subdomains from subfinder...${reset}"
 	subfinder -o subfinder.txt -d $domain
 
 	echo '--------------------------------------------------------------------'
-	echo "${green}Gather domains from gau...${reset}"
-	gau -subs $domain | cut -d / -f 3 > gau.txt
-
-	echo '--------------------------------------------------------------------'
-	echo "${green}Gathering domains from SubDomainizer...${reset}"
-	python3 $toolPath/SubDomainizer/SubDomainizer.py -u $domain -o subdomainizer.txt
-
-	echo '--------------------------------------------------------------------'
-	echo "${green}Gathering domains from ShuffleDNS through bruteforcing...${reset}"
-	shuffledns -d $domain -w $toolPath/all.txt -r $toolPath/massdns/lists/resolvers.txt -o shuffle.txt
+	echo "${green}Gather domains from assetfinder...${reset}"
+	assetfinder $domain > assetfinder.txt
 
 	echo '--------------------------------------------------------------------'
 	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
-	sort -u amass.txt subfinder.txt gau.txt subdomainizer.txt shuffle.txt > domains.txt
+	sort -u amass.txt subfinder.txt assetfinder.txt > domains.txt
 }
 
 hostStatus() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Checking for live hosts from domains...${reset}"
-	cat domains.txt | httprobe > livehosts.txt
+	cat domains.txt | httprobe > httprobe.txt
 }
 
 massTools() {
 	echo '--------------------------------------------------------------------'
-	echo "${green}Using MassDNS for DNS bruteforcing...${reset}"
-	massdns -r $toolPath/massdns/lists/resolvers.txt -t AAAA livehosts.txt > massdns.txt
-	echo "${green}Performing additional recon through subbrute and ct.py...${reset}"
-	$toolPath/massdns/scripts/subbrute.py $toolPath/massdns/lists/names.txt $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w results.txt
-	$toolPath/massdns/scripts/ct.py $domain | massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w ct.txt
+	echo "${green}Getting valid domains through massdns...${reset}"
+	massdns -r $toolPath/resolvers.txt -t A -o S -w results.txt httprobe.txt
+	cat results.txt | awk '{print $1}' | sed 's/.$//' | grep -oP '(http|https)://\K\S+' | sort -u > livehosts.txt
+}
 
-	touch ips.txt
-	while read p; do
-		dig +short $p >> ips.txt 
-	done < livehosts.txt
-	sort -u ips.txt > sortedIPs.txt
-	echo "${green}Checking Masscan for IP ranges...${reset}" 
-	sudo masscan --top-ports 100  -iL sortedIPs.txt --max-rate 100000 -oG masscanResult.gmap
+serviceScan() {
+	echo '--------------------------------------------------------------------'
+	echo "${green}Using host list to determine open services with naabu...${reset}"
+	naabu -iL livehosts.txt -o naabu.txt
+}
+
+fuzz() {
+	echo '--------------------------------------------------------------------'
+	echo "${green}Directory fuzzing using ffuf...${reset}"
+	mkdir "$domain-fuzz"
+	cd "$domain-fuzz"
+	while read url; do
+		fuzzFileName=`echo "$url" | awk -F/ '{print $3}'`-fuzz.txt
+		ffuf -w $wordList -u $url/FUZZ -mc 200,302 -o $fuzzFileName
+	done < ../livehosts.txt
+	cd ..
 }
 
 crawl() {
@@ -100,7 +101,7 @@ cleanup() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Gathering generated files together...${reset}"
 	mkdir utilityFiles
-	mv amass.txt subfinder.txt gau.txt subdomainizer.txt domains.txt shuffle.txt utilityFiles
+	mv amass.txt subfinder.txt domains.txt assetfinder.txt httprobe.txt results.txt utilityFiles
 
 	if [ -e geckodriver.log ]
 	then
@@ -108,7 +109,8 @@ cleanup() {
 	fi
 
 	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
-	sort -u livehosts.txt > hostList.txt	
+	sort -u livehosts.txt > sites.txt
+	mv livehosts.txt utilityFiles	
 	echo "${green}Done!${reset}"
 }
 
@@ -120,6 +122,8 @@ setup
 subdomains
 hostStatus
 massTools
+serviceScan
+#fuzz
 crawl
 screenshots
 #############

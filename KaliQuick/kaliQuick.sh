@@ -104,3 +104,12 @@ echo "Complete"
 echo "Installing FFUF"
 go get -u github.com/ffuf/ffuf
 echo "Complete"
+
+echo "Installing assetfinder"
+go get -u github.com/tomnomnom/assetfinder
+echo "Complete"
+
+echo "Installing naabu"
+sudo apt-get install -y libpcap-dev
+GO111MODULE=on go get -v github.com/projectdiscovery/naabu/v2/cmd/naabu
+echo "Complete"
