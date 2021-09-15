@@ -89,10 +89,11 @@ crawl() {
 	echo "${green}Crawling through sites with GoSpider...${reset}"
 	mkdir "$domain-crawl"
 	cd "$domain-crawl"
-	while read url; do
+	while read -u 9 url; do
 		fullUrl=$(echo $url | sed -e 's/.\/\//_/g')
-		gospider -s "$url" -c 10 -d 1 #| grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
-	done < ../httprobe.txt 
+		echo $fullUrl
+		gospider -s "$url" -c 10 -d 1 | grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
+	done 9< ../httprobe.txt 
 }
 
 screenshots() {
@@ -118,19 +119,19 @@ cleanup() {
 	echo "${green}Done!${reset}"
 }
 
-#############
-#validate
-#header
-#setup
-#############
-#subdomains
-#massTools
-#hostStatus
-#serviceScan
+############
+validate
+header
+setup
+############
+subdomains
+massTools
+hostStatus
+serviceScan
 #fuzz
 crawl
-#screenshots
-#############
-#cleanup
+screenshots
+############
+cleanup
 
 exit 0
