@@ -54,23 +54,23 @@ subdomains() {
 	sort -u amass.txt subfinder.txt assetfinder.txt > domains.txt
 }
 
-hostStatus() {
-	echo '--------------------------------------------------------------------'
-	echo "${green}Checking for live hosts from domains...${reset}"
-	cat domains.txt | httprobe > httprobe.txt
-}
-
 massTools() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Getting valid domains through massdns...${reset}"
-	massdns -r $toolPath/resolvers.txt -t A -o S -w results.txt httprobe.txt
-	cat results.txt | awk '{print $1}' | sed 's/.$//' | grep -oP '(http|https)://\K\S+' | sort -u > livehosts.txt
+	massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w results.txt domains.txt
+	cat results.txt | awk '{print $1}' | sed -e 's/\.$//' > livehosts.txt
+}
+
+hostStatus() {
+	echo '--------------------------------------------------------------------'
+	echo "${green}Checking for live hosts from domains...${reset}"
+	cat livehosts.txt | httprobe > httprobe.txt
 }
 
 serviceScan() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Using host list to determine open services with naabu...${reset}"
-	naabu -iL livehosts.txt -o naabu.txt
+	naabu -iL httprobe.txt -o naabu.txt
 }
 
 fuzz() {
@@ -81,14 +81,18 @@ fuzz() {
 	while read url; do
 		fuzzFileName=`echo "$url" | awk -F/ '{print $3}'`-fuzz.txt
 		ffuf -w $wordList -u $url/FUZZ -mc 200,302 -o $fuzzFileName
-	done < ../livehosts.txt
-	cd ..
+	done < ../httprobe.txt
 }
 
 crawl() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Crawling through sites with GoSpider...${reset}"
-	gospider -S livehosts.txt -o spiderResults -c 10 -d 1 
+	mkdir "$domain-crawl"
+	cd "$domain-crawl"
+	while read url; do
+		fullUrl=$(echo $url | sed -e 's/.\/\//_/g')
+		gospider -s "$url" -c 10 -d 1 #| grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
+	done < ../httprobe.txt 
 }
 
 screenshots() {
@@ -115,18 +119,18 @@ cleanup() {
 }
 
 #############
-validate
-header
-setup
+#validate
+#header
+#setup
 #############
-subdomains
-hostStatus
-massTools
-serviceScan
+#subdomains
+#massTools
+#hostStatus
+#serviceScan
 #fuzz
 crawl
-screenshots
+#screenshots
 #############
-cleanup
+#cleanup
 
 exit 0
