@@ -64,13 +64,13 @@ massTools() {
 hostStatus() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Checking for live hosts from domains...${reset}"
-	cat livehosts.txt | httprobe > httprobe.txt
+	cat livehosts.txt | httprobe 2 >&1 | tee httprobe.txt
 }
 
 serviceScan() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Using host list to determine open services with naabu...${reset}"
-	naabu -iL httprobe.txt -o naabu.txt
+	naabu -iL livehosts.txt -o naabu.txt
 }
 
 fuzz() {
@@ -94,6 +94,7 @@ crawl() {
 		echo $fullUrl
 		gospider -s "$url" -c 10 -d 1 | grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
 	done 9< ../httprobe.txt 
+	cd ..
 }
 
 screenshots() {
