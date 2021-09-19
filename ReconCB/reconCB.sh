@@ -70,7 +70,7 @@ hostStatus() {
 serviceScan() {
 	echo '--------------------------------------------------------------------'
 	echo "${green}Using host list to determine open services with naabu...${reset}"
-	naabu -iL livehosts.txt -o naabu.txt
+	naabu -iL livehosts.txt | sort -u > naabu.txt
 }
 
 fuzz() {
