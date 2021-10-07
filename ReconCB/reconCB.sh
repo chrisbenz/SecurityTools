@@ -98,7 +98,8 @@ crawl() {
 
 	echo '--------------------------------------------------------------------'
 	echo "${green}Checking for interesting Javascript files with gau and httpx...${reset}"
-	gau $url | grep '\.js' | httpx -status-code -mc 200 -content-type | grep 'application/javascript' > js.txt
+	gau $domain | grep '\.js' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
+
 }
 
 screenshots() {
