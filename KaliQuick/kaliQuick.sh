@@ -113,3 +113,7 @@ echo "Installing naabu"
 sudo apt-get install -y libpcap-dev
 GO111MODULE=on go get -v github.com/projectdiscovery/naabu/v2/cmd/naabu
 echo "Complete"
+
+echo "Installing httpx"
+GO111MODULE=on go get -v github.com/projectdiscovery/httpx/cmd/httpx
+echo "Complete"

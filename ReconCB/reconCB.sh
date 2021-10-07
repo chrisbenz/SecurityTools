@@ -95,6 +95,10 @@ crawl() {
 		gospider -s "$url" -c 10 -d 1 | grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
 	done 9< ../httprobe.txt 
 	cd ..
+
+	echo '--------------------------------------------------------------------'
+	echo "${green}Checking for interesting Javascript files with gau and httpx...${reset}"
+	gau $url | grep '\.js' | httpx -status-code -mc 200 -content-type | grep 'application/javascript' > js.txt
 }
 
 screenshots() {
@@ -129,6 +133,7 @@ subdomains
 massTools
 hostStatus
 serviceScan
+############
 #fuzz
 crawl
 screenshots
