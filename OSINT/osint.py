@@ -41,34 +41,30 @@ def print_report(response):
     print("Country:", resJson['country'])
     print("Country Prefix:", resJson['country_prefix'])
 
-def usage_help():
-    print("Usage: python3 osint.py -p <phone number>")
-    print("Usage: python3 osint.py -u <userName>")
-    print("Usage: python3 osint.py -z {zipCodeInfo}")
-
-def addressValidation(fileName: String):
-    print(fileName)
-    f = open(fileName)
-    data = json.load(f)
-    print(data)
-    print(data['addressee'])
-
-    client = ClientBuilder(creds).with_licenses(["us-core-cloud"]).build_us_street_api_client()
-
+def buildLookUp(jsonData):
     lookup = StreetLookup()
-    lookup.addressee = data['addressee']
-    lookup.street = data['street']
-    lookup.street2 = data['street2']
-    lookup.secondary = data['secondary']
+    lookup.addressee = jsonData['addressee']
+    lookup.street = jsonData['street']
+    lookup.street2 = jsonData['street2']
+    lookup.secondary = jsonData['secondary']
 
      # Only applies to Puerto Rico addresses
     lookup.urbanization = "" 
 
-    lookup.city = data['city']
-    lookup.state = data['state']
-    lookup.zipcode = data['zipcode']
-    lookup.candidates = data['candidates']
-    lookup.match = data['match'] 
+    lookup.city = jsonData['city']
+    lookup.state = jsonData['state']
+    lookup.zipcode = jsonData['zipcode']
+    lookup.candidates = jsonData['candidates']
+    lookup.match = jsonData['match'] 
+    return lookup
+
+
+def addressValidation(fileName: String):
+    f = open(fileName)
+    data = json.load(f)
+    client = ClientBuilder(creds).with_licenses(["us-core-cloud"]).build_us_street_api_client()
+
+    lookup = buildLookUp(data)
 
     try:
         client.send_lookup(lookup)
