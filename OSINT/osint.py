@@ -1,7 +1,8 @@
 import argparse
-from ast import parse
+from ast import arg, parse
 from cgitb import lookup
 import json
+import pprint
 
 import requests
 import os
@@ -9,6 +10,7 @@ from tokenize import String
 
 from smartystreets_python_sdk import StaticCredentials, exceptions, ClientBuilder
 from smartystreets_python_sdk.us_street import Lookup as StreetLookup
+from censys.search import CensysHosts
 
 # Setup tokens, API keys, auth IDs, etc.
 VERI_API_KEY = os.environ['VERI_API_KEY']
@@ -23,13 +25,17 @@ def main():
 
     parser = argparse.ArgumentParser(description="Simple script for querying a few different OSINT APIS")
     parser.add_argument("-p", help="Phone number")
-    parser.add_argument("-a", help="Address")
+    parser.add_argument("-a", default="address.json", help="Address", const="address.json", nargs='?')
+    parser.add_argument("-ch", help="Host")
+    # TODO: Integrate Censys
     args = parser.parse_args()
 
     if args.p:
         response = requests.get(VERI_API + args.p + "&key=" + VERI_API_KEY)
         if response.status_code == 200:
             print_report(response)
+    elif args.ch:
+        censysHostQuery(args.ch)
     elif args.a:
         addressValidation(args.a)
 
@@ -57,7 +63,6 @@ def buildLookUp(jsonData):
     lookup.candidates = jsonData['candidates']
     lookup.match = jsonData['match'] 
     return lookup
-
 
 def addressValidation(fileName: String):
     f = open(fileName)
@@ -90,6 +95,12 @@ def addressValidation(fileName: String):
 
     f.close()
 
+def censysHostQuery(host):
+    h = CensysHosts()
+    res = h.view(host)
+    pp = pprint.PrettyPrinter(indent=2)
+    pp.pprint(res)
+    
    
 if __name__ == "__main__":
     main()
