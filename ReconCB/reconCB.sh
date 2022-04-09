@@ -11,11 +11,7 @@ red=`tput setaf 1`
 green=`tput setaf 2`
 reset=`tput sgr0`
 
-header() {
-	echo '--------------------------------------------------------------------'
-	echo 'Starting Recon...'
-	echo '--------------------------------------------------------------------'
-}
+borderEcho="echo --------------------------------------------------------------------"
 
 validate() {
 	if [ "$option" != '-d' ]
@@ -31,6 +27,12 @@ validate() {
 	fi
 }
 
+header() {
+	eval "$borderEcho"
+	echo 'Starting Recon...'
+	eval "$borderEcho"
+}
+
 setup() {
 	storage="${domain}-recon-${timeStamp}"
 	mkdir ${storage}
@@ -41,40 +43,40 @@ subdomains() {
 	echo "${green}Grabbing subdomains from Amass, this may take some time...${reset}"
 	amass enum -passive -o amass.txt -r 8.8.8.8 -d $domain
 
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Grabbing subdomains from subfinder...${reset}"
 	subfinder -o subfinder.txt -d $domain
 
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Gather domains from assetfinder...${reset}"
 	assetfinder $domain > assetfinder.txt
 
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
 	sort -u amass.txt subfinder.txt assetfinder.txt > domains.txt
 }
 
 massTools() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"	
 	echo "${green}Getting valid domains through massdns...${reset}"
 	massdns -r $toolPath/massdns/lists/resolvers.txt -t A -o S -w results.txt domains.txt
 	cat results.txt | awk '{print $1}' | sed -e 's/\.$//' > livehosts.txt
 }
 
 hostStatus() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Checking for live hosts from domains...${reset}"
 	cat livehosts.txt | httprobe 2 >&1 | tee httprobe.txt
 }
 
 serviceScan() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Using host list to determine open services with naabu...${reset}"
 	naabu -iL livehosts.txt | sort -u > naabu.txt
 }
 
 fuzz() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Directory fuzzing using ffuf...${reset}"
 	mkdir "$domain-fuzz"
 	cd "$domain-fuzz"
@@ -85,7 +87,7 @@ fuzz() {
 }
 
 crawl() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Crawling through sites with GoSpider...${reset}"
 	mkdir "$domain-crawl"
 	cd "$domain-crawl"
@@ -96,20 +98,20 @@ crawl() {
 	done 9< ../httprobe.txt 
 	cd ..
 
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Checking for interesting Javascript files with gau and httpx...${reset}"
 	gau $domain | grep '\.js' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
 
 }
 
 screenshots() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Gathering some screenshots of live hosts...${reset}"
 	yes n | $toolPath/EyeWitness/Python/EyeWitness.py -f livehosts.txt --web -d screenshots
 }
 
 cleanup() {
-	echo '--------------------------------------------------------------------'
+	eval "$borderEcho"
 	echo "${green}Gathering generated files together...${reset}"
 	mkdir utilityFiles
 	mv amass.txt subfinder.txt domains.txt assetfinder.txt httprobe.txt results.txt utilityFiles
