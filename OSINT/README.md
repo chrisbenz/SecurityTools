@@ -4,8 +4,9 @@ OSINT APIs
 
 ## Requirements
 - Smarty Python SDK
+- Censys
 ```
-pip install smartystreets_python_sdk
+pip3 install -r requirements.txt
 ```
 - API Keys
 
@@ -15,4 +16,8 @@ save your API keys into environment variables in your shell profile.
 VERI_API_KEY = os.environ['VERI_API_KEY']
 SMARTY_AUTH_ID = os.environ['SMARTY_AUTH_ID']
 SMARTY_TOKEN = os.environ['SMARTY_TOKEN']
+```
+For Censys, run the following configuration command to configure your `API ID` and `API secret`
+```
+censys config
 ```

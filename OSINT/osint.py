@@ -3,7 +3,6 @@ from ast import arg, parse
 from cgitb import lookup
 import json
 import pprint
-
 import requests
 import os
 from tokenize import String
@@ -27,7 +26,6 @@ def main():
     parser.add_argument("-p", help="Phone number")
     parser.add_argument("-a", default="address.json", help="Address", const="address.json", nargs='?')
     parser.add_argument("-ch", help="Host")
-    # TODO: Integrate Censys
     args = parser.parse_args()
 
     if args.p:
@@ -100,7 +98,6 @@ def censysHostQuery(host):
     res = h.view(host)
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(res)
-    
-   
+     
 if __name__ == "__main__":
     main()
