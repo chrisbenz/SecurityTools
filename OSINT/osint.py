@@ -23,27 +23,23 @@ creds = StaticCredentials(SMARTY_AUTH_ID, SMARTY_TOKEN)
 def main():
 
     parser = argparse.ArgumentParser(description="Simple script for querying a few different OSINT APIS")
-    parser.add_argument("-p", help="Phone number")
-    parser.add_argument("-a", default="address.json", help="Address", const="address.json", nargs='?')
-    parser.add_argument("-ch", help="Host")
+    parser.add_argument("-p", help="Get some additional information about a phone number")
+    parser.add_argument("-a", help="Address")
+    parser.add_argument("-ch", help="Use Censys to query for host specific information")
+    parser.add_argument("-e", help ="Email")
+    
     args = parser.parse_args()
 
     if args.p:
-        response = requests.get(VERI_API + args.p + "&key=" + VERI_API_KEY)
-        if response.status_code == 200:
-            print_report(response)
+        phoneVerification(args.p)
     elif args.ch:
         censysHostQuery(args.ch)
     elif args.a:
         addressValidation(args.a)
-
-def print_report(response):
-    resJson = response.json()
-    print("International Number:", resJson['international_number'])
-    print("Local Number:", resJson['local_number'])
-    print("Region:", resJson['phone_region'])
-    print("Country:", resJson['country'])
-    print("Country Prefix:", resJson['country_prefix'])
+    elif args.e:
+        emailValidation(args.e)
+    else: 
+        parser.print_help()
 
 def buildLookUp(jsonData):
     lookup = StreetLookup()
@@ -51,10 +47,8 @@ def buildLookUp(jsonData):
     lookup.street = jsonData['street']
     lookup.street2 = jsonData['street2']
     lookup.secondary = jsonData['secondary']
-
      # Only applies to Puerto Rico addresses
-    lookup.urbanization = "" 
-
+    lookup.urbanization = jsonData['urbanization'] 
     lookup.city = jsonData['city']
     lookup.state = jsonData['state']
     lookup.zipcode = jsonData['zipcode']
@@ -98,6 +92,29 @@ def censysHostQuery(host):
     res = h.view(host)
     pp = pprint.PrettyPrinter(indent=2)
     pp.pprint(res)
+
+def emailValidation(email):
+    # TODO: Implement email lookups
+    return
+
+def phoneVerification(phoneNumber):
+    response = requests.get(VERI_API + phoneNumber + "&key=" + VERI_API_KEY)
+    if response.status_code == 200:
+        printPhoneReport(response)
+    else:
+        print(
+        '''Error! veriphone's api returned", {status_code}
+Please ensure your API key is properly configured on your shell profile 
+and that your key is up-to-date.'''.format(status_code=response.status_code))
+        exit(1)
+
+def printPhoneReport(response):
+    resJson = response.json()
+    print("International Number:", resJson['international_number'])
+    print("Local Number:", resJson['local_number'])
+    print("Region:", resJson['phone_region'])
+    print("Country:", resJson['country'])
+    print("Country Prefix:", resJson['country_prefix'])
      
 if __name__ == "__main__":
     main()
