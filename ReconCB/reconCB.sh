@@ -14,13 +14,7 @@ reset=`tput sgr0`
 borderEcho="echo --------------------------------------------------------------------"
 
 validate() {
-	if [ "$option" != '-d' ]
-	then
-		echo "Usage: ./reconSB.sh -d domain"
-		exit 1
-	fi
-
-	if [ $argCount -ne 2 ]
+	if [ "$option" != '-d' ] || [ $argCount -ne 2 ]
 	then
 		echo "Usage: ./reconSB.sh -d domain"
 		exit 1
@@ -72,7 +66,7 @@ hostStatus() {
 serviceScan() {
 	eval "$borderEcho"
 	echo "${green}Using host list to determine open services with naabu...${reset}"
-	naabu -iL livehosts.txt | sort -u > naabu.txt
+	naabu -iL livehosts.txt | sort -u > openServices.txt
 }
 
 fuzz() {
@@ -91,6 +85,7 @@ crawl() {
 	echo "${green}Crawling through sites with GoSpider...${reset}"
 	mkdir "$domain-crawl"
 	cd "$domain-crawl"
+	
 	while read -u 9 url; do
 		fullUrl=$(echo $url | sed -e 's/.\/\//_/g')
 		echo $fullUrl
@@ -123,7 +118,9 @@ cleanup() {
 
 	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
 	sort -u livehosts.txt > sites.txt
-	mv livehosts.txt utilityFiles	
+	echo -e "\n===Live hosts discovered via Naabu ===" >> sites.txt
+	cat naabu.txt >> sites.txt 
+	mv livehosts.txt naabu.txt utilityFiles	
 	echo "${green}Done!${reset}"
 }
 
