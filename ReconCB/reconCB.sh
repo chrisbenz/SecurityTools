@@ -85,7 +85,7 @@ crawl() {
 	echo "${green}Crawling through sites with GoSpider...${reset}"
 	mkdir "$domain-crawl"
 	cd "$domain-crawl"
-	
+
 	while read -u 9 url; do
 		fullUrl=$(echo $url | sed -e 's/.\/\//_/g')
 		echo $fullUrl
@@ -119,8 +119,13 @@ cleanup() {
 	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
 	sort -u livehosts.txt > sites.txt
 	echo -e "\n===Live hosts discovered via Naabu ===" >> sites.txt
-	cat naabu.txt >> sites.txt 
-	mv livehosts.txt naabu.txt utilityFiles	
+	if [ -f naabu.txt ]
+	then
+		cat naabu.txt >> sites.txt 
+		mv naabu.txt utilityFiles
+	fi
+	
+	mv livehosts.txt utilityFiles	
 	echo "${green}Done!${reset}"
 }
 
@@ -134,7 +139,7 @@ massTools
 hostStatus
 serviceScan
 ############
-#fuzz
+# fuzz
 crawl
 screenshots
 ############
