@@ -1,5 +1,7 @@
 from PIL import Image
-from PIL.ExifTags import TAGS
+from PIL.ExifTags import TAGS, GPSTAGS
+from GPSPhoto import gpsphoto
+import exifread
 import sys
 
 def main():
@@ -27,8 +29,13 @@ def main():
 			try:
 				data = data.decode()
 			except UnicodeError:
-				data = data.decode('latin-1')
+				data = data.decode('latin-1')	
 
 		print(f"{tag:25}: {data}")
 
-main()
+	gpsData = gpsphoto.getGPSData(imageName)
+	print(f"{'Latitude':25}: {gpsData['Latitude']}")
+	print(f"{'Longitude':25}: {gpsData['Longitude']}")
+
+if __name__ == "__main__":
+    main()
