@@ -36,6 +36,8 @@ def main():
 	gpsData = gpsphoto.getGPSData(imageName)
 	print(f"{'Latitude':25}: {gpsData['Latitude']}")
 	print(f"{'Longitude':25}: {gpsData['Longitude']}")
+	link = 'https://www.google.com/maps/place/%s,%s' % (gpsData['Latitude'], gpsData['Longitude'])
+	print(f"{'Google Maps Link:25':25}: {link}")
 
 if __name__ == "__main__":
     main()
