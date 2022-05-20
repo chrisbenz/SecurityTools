@@ -13,8 +13,8 @@ def main():
 
 	parser = argparse.ArgumentParser(description='Extract EXIF data from an image')
 	parser.add_argument('imageName', help='Path to an image')
+	parser.add_argument('-o', help='Output path for resulting JSON')
 	args = parser.parse_args()
-	print(args)
 
 	imageName = args.imageName
 
@@ -44,9 +44,13 @@ def main():
 	link = 'https://www.google.com/maps/place/%s,%s' % (gpsData['Latitude'], gpsData['Longitude'])
 	result['Google-Maps-Link'] = link
 	
-	print(result)
-	fp = open('res.json', 'w') 
-	fp.write(json.dumps(result, indent=4))
+	finalJSON = json.dumps(result, indent=4)
+
+	if args.o:
+		fp = open(args.o, 'w') 
+		fp.write(finalJSON)
+	else:
+		print(finalJSON)
 		
 	
 
