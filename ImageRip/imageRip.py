@@ -1,11 +1,13 @@
 import string
 from tokenize import String
+from unittest import result
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from GPSPhoto import gpsphoto
 import exifread
 import sys
 import argparse
+import json
 
 def main():
 
@@ -24,6 +26,8 @@ def main():
 
 	exifData = image._getexif()
 
+	result = {}
+
 	for tagId in exifData:
 		tag = TAGS.get(tagId, tagId)
 		data = exifData.get(tagId)
@@ -32,13 +36,19 @@ def main():
 				data = data.decode()
 			except UnicodeError:
 				data = data.decode('latin-1')	
-		print(f"{tag:25}: {data}")
+		result[tag] = str(data)
 
 	gpsData = gpsphoto.getGPSData(imageName)
-	print(f"{'Latitude':25}: {gpsData['Latitude']}")
-	print(f"{'Longitude':25}: {gpsData['Longitude']}")
+	result['Latitude'] = gpsData['Latitude']
+	result['Longitude'] = gpsData['Longitude']
 	link = 'https://www.google.com/maps/place/%s,%s' % (gpsData['Latitude'], gpsData['Longitude'])
-	print(f"{'Google Maps Link:':25}: {link}")
+	result['Google-Maps-Link'] = link
+	
+	print(result)
+	fp = open('res.json', 'w') 
+	fp.write(json.dumps(result, indent=4))
+		
+	
 
 if __name__ == "__main__":
     main()
