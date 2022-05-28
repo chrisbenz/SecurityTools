@@ -1,0 +1,12 @@
+{
+    "addressee": "John Smith",
+    "street": "1600 Amphitheatre Pkwy",
+    "street2": "",
+    "secondary": "APT 2",
+    "urbanization": "",
+    "city": "Mountain View",
+    "state": "CA",
+    "zipcode": "94043",
+    "candidates": 3,
+    "match": "invalid"
+}
