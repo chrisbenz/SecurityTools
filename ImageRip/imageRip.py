@@ -39,10 +39,12 @@ def main():
 		result[tag] = str(data)
 
 	gpsData = gpsphoto.getGPSData(imageName)
-	result['Latitude'] = gpsData['Latitude']
-	result['Longitude'] = gpsData['Longitude']
-	link = 'https://www.google.com/maps/place/%s,%s' % (gpsData['Latitude'], gpsData['Longitude'])
-	result['Google-Maps-Link'] = link
+
+	if gpsData:
+		result['Latitude'] = gpsData['Latitude']
+		result['Longitude'] = gpsData['Longitude']
+		link = 'https://www.google.com/maps/place/%s,%s' % (gpsData['Latitude'], gpsData['Longitude'])
+		result['Google-Maps-Link'] = link
 	
 	finalJSON = json.dumps(result, indent=4)
 
