@@ -1,11 +1,6 @@
-import string
-from tokenize import String
-from unittest import result
 from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
+from PIL.ExifTags import TAGS
 from GPSPhoto import gpsphoto
-import exifread
-import sys
 import argparse
 import json
 
