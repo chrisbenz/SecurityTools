@@ -34,20 +34,30 @@ setup() {
 }
 
 subdomains() {
-	echo "${green}Grabbing subdomains from Amass, this may take some time...${reset}"
-	amass enum -passive -o amass.txt -r 8.8.8.8 -d $domain
-
-	eval "$borderEcho"
-	echo "${green}Grabbing subdomains from subfinder...${reset}"
-	subfinder -o subfinder.txt -d $domain
-
-	eval "$borderEcho"
-	echo "${green}Gather domains from assetfinder...${reset}"
-	assetfinder $domain > assetfinder.txt
+	amass
+	subfinder
+	assetfinder
 
 	eval "$borderEcho"
 	echo "${green}Merging subdomain lists and removing duplicates...${reset}"
 	sort -u amass.txt subfinder.txt assetfinder.txt > domains.txt
+}
+
+amass() {
+	echo "${green}Grabbing subdomains from Amass, this may take some time...${reset}"
+	amass enum -passive -o amass.txt -r 8.8.8.8 -d $domain
+}
+
+subfinder() {
+	eval "$borderEcho"
+	echo "${green}Grabbing subdomains from subfinder...${reset}"
+	subfinder -o subfinder.txt -d $domain
+}
+
+assetfinder() {
+	eval "$borderEcho"
+	echo "${green}Gather domains from assetfinder...${reset}"
+	assetfinder $domain > assetfinder.txt
 }
 
 massTools() {
