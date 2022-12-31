@@ -20,6 +20,9 @@ python() {
 	# Python Setup Tools
 	sudo apt-get install -y python3-setuptools
 	sudo apt-get install -y python-setuptools
+
+	# Install Dirsearch
+	pip3 install dirsearch
 }
 
 sublime() {
