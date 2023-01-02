@@ -1,11 +1,10 @@
 import argparse
-from ast import arg, parse
-from cgitb import lookup
 import json
 import pprint
 import requests
 import os
 from tokenize import String
+import report
 
 from smartystreets_python_sdk import StaticCredentials, exceptions, ClientBuilder
 from smartystreets_python_sdk.us_street import Lookup as StreetLookup
@@ -77,13 +76,7 @@ def addressValidation(fileName: String):
 
     first_candidate = result[0]
 
-    print("There is at least one candidate.")
-    print("If the match parameter is set to STRICT, the address is valid.")
-    print("Otherwise, check the Analysis output fields to see if the address is valid.\n")
-    print("ZIP Code: " + first_candidate.components.zipcode)
-    print("County: " + first_candidate.metadata.county_name)
-    print("Latitude: {}".format(first_candidate.metadata.latitude))
-    print("Longitude: {}".format(first_candidate.metadata.longitude))
+    report.printAddressInfo(first_candidate)
 
     f.close()
 
@@ -100,7 +93,7 @@ def emailValidation(email):
 def phoneVerification(phoneNumber):
     response = requests.get(VERI_API + phoneNumber + "&key=" + VERI_API_KEY)
     if response.status_code == 200:
-        printPhoneReport(response)
+        report.printPhoneReport(response)
     else:
         print(
         '''Error! veriphone's api returned", {status_code}
@@ -108,13 +101,6 @@ Please ensure your API key is properly configured on your shell profile
 and that your key is up-to-date.'''.format(status_code=response.status_code))
         exit(1)
 
-def printPhoneReport(response):
-    resJson = response.json()
-    print("International Number:", resJson['international_number'])
-    print("Local Number:", resJson['local_number'])
-    print("Region:", resJson['phone_region'])
-    print("Country:", resJson['country'])
-    print("Country Prefix:", resJson['country_prefix'])
      
 if __name__ == "__main__":
     main()
