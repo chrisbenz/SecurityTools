@@ -90,7 +90,7 @@ host_status() {
 service_scan() {
 	eval "$borderEcho"
 	echo "${green}Using host list to determine open services with naabu...${reset}"
-	naabu -list livehosts.txt | sort -u > open_services.txt
+	naabu -v -list livehosts.txt | sort -u > open_services.txt
 }
 
 fuzz() {
@@ -111,7 +111,7 @@ spider() {
 	touch spider.txt
 
 	while read -u 9 url; do
-		echo $fullUrl
+		echo $url
 		# Run gospider, then take all hrefs, parse output with awk, and append to a file
 		gospider -s "$url" -c 10 | grep "\[href\] - $url" | awk '{print $3}' >> spider.txt 
 	done 9< httprobe.txt 
@@ -119,6 +119,7 @@ spider() {
 	# Sort for unique URLs
 	sort -u spider.txt -o spider.txt
 
+	# Grep for some possible targets to fuzz
 	grep '?*=' spider.txt > fuzz.txt
 
 }
@@ -148,6 +149,7 @@ cleanup() {
 	mkdir utilityFiles
 	mv domains.txt httprobe.txt utilityFiles
 
+	# Moving geckodriver log files away
 	if [ -e geckodriver.log ]
 	then
 		mv geckodriver.log utilityFiles
@@ -155,7 +157,8 @@ cleanup() {
 
 	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
 	cat livehosts.txt >> sites.txt
-	echo -e "\n===Live hosts discovered via Naabu ===" >> sites.txt
+	mv livehosts.txt utilityFiles
+
 	if [ -f open_services.txt ]
 	then
 		cat open_services.txt >> sites.txt 
@@ -164,7 +167,6 @@ cleanup() {
 
 	sort -u sites.txt -o sites.txt
 	
-	mv livehosts.txt utilityFiles	
 	echo "${green}Done!${reset}"
 }
 
