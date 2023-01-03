@@ -34,7 +34,7 @@ setup() {
 	file_storage_name="${domain}-${timeStamp}"
 
 	while [ -e "$file_storage_name" ]; do
-	    printf -v file_storage_name '%s-%02d' "${domain}-${timeStamp}" "$(( ++number ))"
+	    printf -v file_storage_name '%s-%d' "${domain}-${timeStamp}" "$(( ++number ))"
 	done
 
 	mkdir ${file_storage_name}
@@ -86,6 +86,7 @@ host_status() {
 	cat livehosts.txt | httprobe 2 >&1 | tee httprobe.txt
 }
 
+# Check what hosts are open and on what ports.
 service_scan() {
 	eval "$borderEcho"
 	echo "${green}Using host list to determine open services with naabu...${reset}"
@@ -98,33 +99,40 @@ fuzz() {
 	mkdir "$domain-fuzz"
 	cd "$domain-fuzz"
 	while read url; do
-		fuzzFileName=`echo "$url" | awk -F/ '{print $3}'`-fuzz.txt
-		ffuf -w $wordList -u $url/FUZZ -mc 200,302 -o $fuzzFileName
-	done < ../httprobe.txt
+		echo $url
+		# fuzzFileName=`echo "$url" | awk -F/ '{print $3}'`-fuzz.txt
+		# ffuf -w $wordList -u $url/FUZZ -mc 200,302 -o $fuzzFileName
+	done < fuzz.txt
 }
 
 spider() {
 	eval "$borderEcho"
 	echo "${green}Crawling through sites with GoSpider...${reset}"
-	mkdir "$domain-crawl"
-	cd "$domain-crawl"
+	touch spider.txt
 
 	while read -u 9 url; do
-		fullUrl=$(echo $url | sed -e 's/.\/\//_/g')
 		echo $fullUrl
-		gospider -s "$url" -c 10 -d 1 | grep "\[href\] - $url" | awk '{print $3}' > "$fullUrl" 
-	done 9< ../httprobe.txt 
-	cd ..
+		# Run gospider, then take all hrefs, parse output with awk, and append to a file
+		gospider -s "$url" -c 10 | grep "\[href\] - $url" | awk '{print $3}' >> spider.txt 
+	done 9< httprobe.txt 
+
+	# Sort for unique URLs
+	sort -u spider.txt -o spider.txt
+
+	grep '?*=' spider.txt > fuzz.txt
+
 }
 
 run_gau() {
 	eval "$borderEcho"
-	echo "${green}Checking for interesting Javascript files with gau and httpx...${reset}"
-	gau $domain | grep '\.js' | httpx -status-code -mc 200 -content-type | grep 'application/javascript'
+	echo "${green}Checking for interesting URLs with gau...${reset}"
+	gau $domain -blacklist svg,png,jpg --mc 200,201,202,203,204,205,206,207,208,209 --o sites.txt
 }
 
 crawl() {
-	#spider
+	# Run gospider to try and find some interesting URLs
+	spider
+	# Run get all urls to find some old URLs that might be worth investigating
 	run_gau
 }
 
@@ -138,7 +146,7 @@ cleanup() {
 	eval "$borderEcho"
 	echo "${green}Gathering generated files together...${reset}"
 	mkdir utilityFiles
-	mv domains.txt httprobe.txt results.txt utilityFiles
+	mv domains.txt httprobe.txt utilityFiles
 
 	if [ -e geckodriver.log ]
 	then
@@ -146,13 +154,15 @@ cleanup() {
 	fi
 
 	echo "${green}Finished gathering domains, sorting livehosts...${reset}"
-	sort -u livehosts.txt > sites.txt
+	cat livehosts.txt >> sites.txt
 	echo -e "\n===Live hosts discovered via Naabu ===" >> sites.txt
 	if [ -f open_services.txt ]
 	then
 		cat open_services.txt >> sites.txt 
 		mv open_services.txt utilityFiles
 	fi
+
+	sort -u sites.txt -o sites.txt
 	
 	mv livehosts.txt utilityFiles	
 	echo "${green}Done!${reset}"
@@ -165,9 +175,9 @@ subdomains
 mass_tools
 host_status
 service_scan
+crawl
 
 # fuzz
-# crawl
 # screenshots
 
 cleanup
